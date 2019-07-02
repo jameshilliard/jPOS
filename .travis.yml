@@ -8,9 +8,6 @@ jdk:
   - openjdk10
   - openjdk11
   - openjdk12
-before_script:
-  - echo $JAVA_OPTS
-  - export JAVA_OPTS=-Xmx4G
 install: true
 script:
   - java -version
@@ -23,7 +20,9 @@ deploy:
     branch: master
 env:
   global:
-    secure: ZWDnTNCsRaxOV4hPiWslj1ieKwYjuxBA4COHFVApxr8TBcQEwhPAzo+b+WbDsi45rJkk/Ee9Du0+mbT//x3TTK78fePg6EDk0WBSmWRUFC3eITgTmUJe7Qh5VOUZOdz9vFaYH8080/CB4VyygJuSp2XLte+S/MVSoXVVABrNggU=
+    - JAVA_OPTS="-Xmx1G -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"
+    - GRADLE_OPTS="-Xmx1G -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"
+    - secure: ZWDnTNCsRaxOV4hPiWslj1ieKwYjuxBA4COHFVApxr8TBcQEwhPAzo+b+WbDsi45rJkk/Ee9Du0+mbT//x3TTK78fePg6EDk0WBSmWRUFC3eITgTmUJe7Qh5VOUZOdz9vFaYH8080/CB4VyygJuSp2XLte+S/MVSoXVVABrNggU=
 notifications:
   slack:
     secure: opKU+4jJWYuhq5STCVW2cvxEq/1/xY17xpxGKoJXWA+RbhPo+viT5uJLmb67HwdmvQNwUVAW6uOLO7SDOmpGh5oAwpI74DrA0y6uEzN6GgzutZDBY5oCMRYCGi/5xNOuzDdsryDtSJvXWLxyCysnTrAqqQ9XdOnRK/ZqSIeQg+s=

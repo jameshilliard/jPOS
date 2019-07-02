@@ -325,7 +325,7 @@ public class Q2Test {
         q2.shutdown();
     }
 
-    @Test
+    @Ignore @Test
     public void testAdditionalInstance() {
         m_q2.start();
         m_q2.ready(5000L);

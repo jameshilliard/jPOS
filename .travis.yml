@@ -16,8 +16,11 @@ script:
   - java -version
   - ulimit -a
   - TERM=dumb ./gradlew jpos:assemble jpos:check --info
-after_success: .travis/update-gh-pages.sh
-after_failure: .travis/update-gh-pages.sh
+deploy:
+  provider: script
+  script: bash .travis/update-gh-pages.sh
+  on:
+    branch: master
 env:
   global:
     secure: ZWDnTNCsRaxOV4hPiWslj1ieKwYjuxBA4COHFVApxr8TBcQEwhPAzo+b+WbDsi45rJkk/Ee9Du0+mbT//x3TTK78fePg6EDk0WBSmWRUFC3eITgTmUJe7Qh5VOUZOdz9vFaYH8080/CB4VyygJuSp2XLte+S/MVSoXVVABrNggU=

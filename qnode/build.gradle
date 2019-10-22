@@ -1,7 +1,7 @@
 dependencies {
-    compile "commons-cli:commons-cli:1.2"
-    compile 'org.apache.felix:org.apache.felix.framework:5.4.0'
-    // compile( "org.osgi:org.osgi.core:4.3.1" )
+    implementation "commons-cli:commons-cli:1.2"
+    implementation 'org.apache.felix:org.apache.felix.framework:5.4.0'
+    // implementation( "org.osgi:org.osgi.core:4.3.1" )
 }
 
 def archiveJarName="${project.name}-${project.version}.jar"
@@ -36,7 +36,7 @@ def jposCopySpec = copySpec {
 
 task listJars {
     doLast {
-        configurations.testCompile.each { File file -> println file.name }
+        configurations.testImplementation.each { File file -> println file.name }
     }
 }
  
@@ -44,7 +44,7 @@ jar () {
     manifest {
         def manifestClasspath = configurations.runtime.collect { "lib/" + it.getName() }.join(' ') 
         attributes 'Implementation-Title': 'jPOS', 
-                   'Implementation-Version': version,
+                   'Implementation-Version': archiveVersion,
                    'Main-Class': 'org.jpos.qnode.QNode',
                    'Class-Path': manifestClasspath
     }
@@ -69,7 +69,7 @@ task dist (type: Tar) {
     compression = Compression.GZIP
     includeEmptyDirs true
     with jposCopySpec
-    into "jpos-$version"
+    into "jpos-$archiveVersion"
 }
 
 task version (type: JavaExec, dependsOn: classes) {
@@ -83,8 +83,10 @@ class GitRevisionTask extends DefaultTask
 {
     @InputFile @Optional
     File gitHead
+    @Input
     boolean gotHead
 
+    @InputFile @Optional
     File getRefFile()
     {
         return new File(gitHead.parent,gitHead.text.replace('ref: ', '').trim())
@@ -115,7 +117,7 @@ class GitRevisionTask extends DefaultTask
 }
 
 class BuildTimestampTask extends DefaultTask {
-    // We don't want to declare @OutputFile, we need a fresh timestamp on every run
+    @OutputFile
     File outputFile
 
     @TaskAction
@@ -137,6 +139,7 @@ task createRevisionPropertyFile(type: GitRevisionTask) {
 }
 
 task createBuildTimestampPropertyFile(type: BuildTimestampTask) {
+    outputs.upToDateWhen { false }
     outputFile = "$sourceSets.main.output.resourcesDir/org/jpos/qnode/buildinfo.properties" as File
 }
 

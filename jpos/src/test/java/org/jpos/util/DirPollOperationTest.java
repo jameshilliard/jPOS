@@ -93,6 +93,7 @@ public class DirPollOperationTest {
         FileOutputStream fileOutputStream = new FileOutputStream(testIncomingFile);
         fileOutputStream.write("test".getBytes());
         fileOutputStream.flush();
+        fileOutputStream.getFD().sync();
 		fileOutputStream.close();
         assertThat(testIncomingFile.exists(), is(true));
 
@@ -114,6 +115,7 @@ public class DirPollOperationTest {
         FileOutputStream fileOutputStream = new FileOutputStream(testIncomingFile);
         fileOutputStream.write("test".getBytes());
         fileOutputStream.flush();
+        fileOutputStream.getFD().sync();
 		fileOutputStream.close();
         assertThat(testIncomingFile.exists(), is(true));
 
@@ -136,6 +138,7 @@ public class DirPollOperationTest {
         FileOutputStream fileOutputStream = new FileOutputStream(testIncomingFile);
         fileOutputStream.write("test".getBytes());
         fileOutputStream.flush();
+        fileOutputStream.getFD().sync();
 		fileOutputStream.close();
         assertThat(testIncomingFile.exists(), is(true));
 
@@ -153,6 +156,7 @@ public class DirPollOperationTest {
         FileOutputStream fileOutputStream = new FileOutputStream(testIncomingFile);
         fileOutputStream.write("test".getBytes());
         fileOutputStream.flush();
+        fileOutputStream.getFD().sync();
 		fileOutputStream.close();
         assertThat(testIncomingFile.exists(), is(true));
 
@@ -172,6 +176,7 @@ public class DirPollOperationTest {
         FileOutputStream fileOutputStream = new FileOutputStream(testIncomingFile);
         fileOutputStream.write("test".getBytes());
         fileOutputStream.flush();
+        fileOutputStream.getFD().sync();
 		fileOutputStream.close();
         assertThat(testIncomingFile.exists(), is(true));
 
@@ -192,6 +197,7 @@ public class DirPollOperationTest {
         FileOutputStream fileOutputStream = new FileOutputStream(testIncomingFile);
         fileOutputStream.write("test".getBytes());
         fileOutputStream.flush();
+        fileOutputStream.getFD().sync();
         fileOutputStream.close();
         assertThat(testIncomingFile.exists(), is(true));
 

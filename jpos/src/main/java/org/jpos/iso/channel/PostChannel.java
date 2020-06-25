@@ -21,7 +21,7 @@ package org.jpos.iso.channel;
 import org.jpos.iso.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * ISOChannel implementation - Postilion Channel
@@ -67,7 +67,7 @@ public class PostChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public PostChannel (ISOPackager p, ServerSocket serverSocket) 
+    public PostChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

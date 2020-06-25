@@ -19,7 +19,7 @@
 package org.jpos.iso;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * <code>ISOServerSocketFactory</code> is used by BaseChannel and ISOServer
@@ -39,6 +39,6 @@ public interface ISOServerSocketFactory {
     * @exception ISOException on any other error
     * creation
     */
-    ServerSocket createServerSocket(int port)
+    AsynchronousServerSocketChannel createServerSocket(int port)
         throws IOException, ISOException;
 }

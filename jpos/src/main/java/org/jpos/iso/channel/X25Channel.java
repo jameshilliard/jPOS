@@ -24,8 +24,8 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.Vector;
 
 /**
@@ -81,7 +81,7 @@ public class X25Channel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public X25Channel (ISOPackager p, ServerSocket serverSocket) 
+    public X25Channel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

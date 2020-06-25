@@ -33,6 +33,7 @@ import org.jpos.util.NameRegistrar;
 import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.*;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -95,7 +96,7 @@ public abstract class BaseChannel extends Observable
     protected Object serverInLock = new Object();
     protected Object serverOutLock = new Object();
     protected ISOPackager packager;
-    protected ServerSocket serverSocket = null;
+    protected AsynchronousServerSocketChannel serverSocket = null;
     protected List<ISOFilter> incomingFilters, outgoingFilters;
     protected ISOClientSocketFactory socketFactory = null;
 
@@ -154,7 +155,7 @@ public abstract class BaseChannel extends Observable
      * @exception IOException on error
      * @see ISOPackager
      */
-    public BaseChannel (ISOPackager p, ServerSocket serverSocket) 
+    public BaseChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException 
     {
         this();
@@ -231,7 +232,7 @@ public abstract class BaseChannel extends Observable
      * Associates this ISOChannel with a server socket
      * @param sock where to accept a connection
      */
-    public void setServerSocket (ServerSocket sock) {
+    public void setServerSocket (AsynchronousServerSocketChannel sock) {
         setHost (null, 0);
         this.serverSocket = sock;
         name = "";
@@ -355,7 +356,7 @@ public abstract class BaseChannel extends Observable
     /**
      * @return current serverSocket
      */
-    public ServerSocket getServerSocket() {
+    public AsynchronousServerSocketChannel getServerSocket() {
         return serverSocket;
     }
 
@@ -407,7 +408,7 @@ public abstract class BaseChannel extends Observable
         try {
             if (serverSocket != null) {
                 accept(serverSocket);
-                evt.addMessage ("local port "+serverSocket.getLocalPort()
+                evt.addMessage ("local port "+((InetSocketAddress)serverSocket.getLocalAddress()).getPort()
                     +" remote host "+socket.getInetAddress());
             }
             else {
@@ -808,8 +809,8 @@ public abstract class BaseChannel extends Observable
     public void disconnect () throws IOException {
         LogEvent evt = new LogEvent (this, "disconnect");
         if (serverSocket != null) 
-            evt.addMessage ("local port "+serverSocket.getLocalPort()
-                +" remote host "+serverSocket.getInetAddress());
+            evt.addMessage ("local port "+((InetSocketAddress)serverSocket.getLocalAddress()).getPort()
+                +" remote host "+((InetSocketAddress)serverSocket.getLocalAddress()).getAddress());
         else
             evt.addMessage (host+":"+port);
         try {

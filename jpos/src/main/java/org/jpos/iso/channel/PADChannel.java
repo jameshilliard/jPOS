@@ -28,7 +28,7 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Implements an ISOChannel suitable to be used to connect to an X.25 PAD.
@@ -75,7 +75,7 @@ public class PADChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public PADChannel (ISOPackager p, ServerSocket serverSocket)
+    public PADChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super (p, serverSocket);

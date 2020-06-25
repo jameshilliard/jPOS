@@ -25,8 +25,8 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Implements an ISOChannel able to exchange <b>jPOS generated</b> (or
@@ -91,7 +91,7 @@ public class TelnetXMLChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public TelnetXMLChannel(ISOPackager p, ServerSocket serverSocket)
+    public TelnetXMLChannel(ISOPackager p, AsynchronousServerSocketChannel serverSocket)
             throws IOException {
         super(p, serverSocket);
     }

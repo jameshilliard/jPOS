@@ -19,7 +19,7 @@
 package org.jpos.iso.channel;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 import org.jpos.iso.BaseChannel;
 import org.jpos.iso.ISOException;
@@ -62,7 +62,7 @@ public class GICCChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public GICCChannel (ISOPackager p, ServerSocket serverSocket) 
+    public GICCChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

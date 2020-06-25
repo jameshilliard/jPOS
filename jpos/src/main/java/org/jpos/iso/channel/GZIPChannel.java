@@ -21,7 +21,7 @@ package org.jpos.iso.channel;
 import org.jpos.iso.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -64,7 +64,7 @@ public class GZIPChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public GZIPChannel (ISOPackager p, ServerSocket serverSocket) 
+    public GZIPChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

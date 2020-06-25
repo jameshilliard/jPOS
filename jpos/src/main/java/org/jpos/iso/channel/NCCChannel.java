@@ -25,7 +25,7 @@ import org.jpos.core.Configuration;
 import org.jpos.core.ConfigurationException;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Talks with TCP based NCCs
@@ -77,7 +77,7 @@ public class NCCChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public NCCChannel (ISOPackager p, byte[] TPDU, ServerSocket serverSocket) 
+    public NCCChannel (ISOPackager p, byte[] TPDU, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

@@ -23,7 +23,7 @@ import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * ISOChannel implementation - American Express
@@ -80,7 +80,7 @@ public class AmexChannel extends BaseChannel {
 	 * @exception IOException
 	 * @see ISOPackager
 	 */
-	public AmexChannel(ISOPackager p, ServerSocket serverSocket)
+	public AmexChannel(ISOPackager p, AsynchronousServerSocketChannel serverSocket)
 			throws IOException {
 		super(p, serverSocket);
 	}

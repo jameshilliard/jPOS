@@ -21,7 +21,7 @@ package org.jpos.iso.channel;
 import org.jpos.iso.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * ISOChannel implementation - RAW Channel
@@ -73,7 +73,7 @@ public class RawChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public RawChannel (ISOPackager p, byte[] header, ServerSocket serverSocket) 
+    public RawChannel (ISOPackager p, byte[] header, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

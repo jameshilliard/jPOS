@@ -23,7 +23,7 @@ import org.jpos.core.ConfigurationException;
 import org.jpos.iso.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * ISOChannel implementation - CS standard Channel<br>
@@ -71,7 +71,7 @@ public class CSChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public CSChannel (ISOPackager p, ServerSocket serverSocket) 
+    public CSChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

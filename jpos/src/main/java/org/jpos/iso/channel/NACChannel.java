@@ -23,7 +23,7 @@ import org.jpos.core.ConfigurationException;
 import org.jpos.iso.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Talks with TCP based NACs
@@ -77,7 +77,7 @@ public class NACChannel extends BaseChannel {
      * @exception IOException on error
      * @see ISOPackager
      */
-    public NACChannel (ISOPackager p, byte[] TPDU, ServerSocket serverSocket) 
+    public NACChannel (ISOPackager p, byte[] TPDU, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

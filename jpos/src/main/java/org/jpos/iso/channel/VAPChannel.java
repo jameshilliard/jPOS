@@ -26,7 +26,7 @@ import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * ISOChannel implementation - VISA's VAP framing
@@ -78,7 +78,7 @@ public class VAPChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public VAPChannel (ISOPackager p, ServerSocket serverSocket) 
+    public VAPChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

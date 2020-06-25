@@ -19,7 +19,7 @@
 package org.jpos.iso;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Tag this channel as a server one (from a Socket point of view)
@@ -39,6 +39,6 @@ public interface ServerChannel extends ISOChannel {
     * Accepts connection 
     * @exception IOException
     */
-   void accept(ServerSocket s) throws IOException;
+   void accept(AsynchronousServerSocketChannel s) throws IOException;
 }
 

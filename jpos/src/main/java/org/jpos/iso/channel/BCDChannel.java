@@ -23,7 +23,7 @@ import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Talks with TCP based NCCs
@@ -74,7 +74,7 @@ public class BCDChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public BCDChannel (ISOPackager p, byte[] TPDU, ServerSocket serverSocket) 
+    public BCDChannel (ISOPackager p, byte[] TPDU, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

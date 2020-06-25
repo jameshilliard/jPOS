@@ -25,10 +25,10 @@ import java.io.PrintStream;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventObject;
@@ -50,6 +50,8 @@ import org.jpos.util.Loggeable;
 import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.ThreadPool;
+
+import static java.net.StandardSocketOptions.SO_REUSEADDR;
 
 /**
  * Accept ServerChannel sessions and forwards them to ISORequestListeners
@@ -94,7 +96,7 @@ public class ISOServer extends Observable
     private int backlog;
     protected Configuration cfg;
     private boolean shutdown = false;
-    private ServerSocket serverSocket;
+    private AsynchronousServerSocketChannel serverSocket;
     private Map channels;
     protected boolean ignoreISOExceptions;
     protected List<ISOServerEventListener> serverListeners = null;
@@ -279,10 +281,10 @@ public class ISOServer extends Observable
 
 
     @Override
-    public ServerSocket createServerSocket(int port) throws IOException {
-        ServerSocket ss = new ServerSocket();
+    public AsynchronousServerSocketChannel createServerSocket(int port) throws IOException {
+        AsynchronousServerSocketChannel ss = AsynchronousServerSocketChannel.open();
         try {
-            ss.setReuseAddress(true);
+            ss.setOption(SO_REUSEADDR, true);
             ss.bind(new InetSocketAddress(bindAddr, port), backlog);
         } catch(SecurityException e) {
             ss.close();

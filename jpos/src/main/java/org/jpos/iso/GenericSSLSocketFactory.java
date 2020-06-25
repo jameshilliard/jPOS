@@ -29,9 +29,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -55,7 +55,7 @@ public class GenericSSLSocketFactory
 { 
 
     private SSLContext sslc=null;
-    private SSLServerSocketFactory  serverFactory=null;
+    private SSLEngine  serverFactory=null;
     private SSLSocketFactory socketFactory=null;
 
     private String keyStore=null;
@@ -155,11 +155,11 @@ public class GenericSSLSocketFactory
      * @exception ISOException if an error occurs during server socket
      * creation
      */
-    protected SSLServerSocketFactory createServerSocketFactory() 
+    protected SSLEngine createServerSocketFactory()
         throws ISOException
     {
         if(sslc==null) sslc=getSSLContext();
-        return sslc.getServerSocketFactory();
+        return sslc.createSSLEngine();
     }
         
     /**
@@ -184,11 +184,11 @@ public class GenericSSLSocketFactory
      * @exception ISOException should an error occurs during 
      * creation
      */
-    public ServerSocket createServerSocket(int port) 
+    public AsynchronousServerSocketChannel createServerSocket(int port)
         throws IOException, ISOException
     {
         if(serverFactory==null) serverFactory=createServerSocketFactory();
-        ServerSocket socket = serverFactory.createServerSocket(port);
+        AsynchronousServerSocketChannel socket = AsynchronousServerSocketChannel.open(). serverFactory.createServerSocket(port);
         SSLServerSocket serverSocket = (SSLServerSocket) socket;
         serverSocket.setNeedClientAuth(clientAuthNeeded);
         if (enabledCipherSuites != null && enabledCipherSuites.length > 0) {

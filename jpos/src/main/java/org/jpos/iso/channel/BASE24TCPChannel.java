@@ -23,7 +23,7 @@ import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Implements an ISOChannel able to exchange messages with
@@ -76,7 +76,7 @@ public class BASE24TCPChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public BASE24TCPChannel (ISOPackager p, ServerSocket serverSocket) 
+    public BASE24TCPChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

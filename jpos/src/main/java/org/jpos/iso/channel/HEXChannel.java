@@ -23,7 +23,7 @@ import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Sends a four ASCII hex characters indicating message length (up to 0xffff)
@@ -70,7 +70,7 @@ public class HEXChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public HEXChannel (ISOPackager p, byte[] TPDU, ServerSocket serverSocket) 
+    public HEXChannel (ISOPackager p, byte[] TPDU, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

@@ -26,8 +26,8 @@ import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,7 +75,7 @@ public class LogChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public LogChannel (ISOPackager p, ServerSocket serverSocket) 
+    public LogChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

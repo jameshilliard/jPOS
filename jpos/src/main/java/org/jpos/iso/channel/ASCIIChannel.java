@@ -23,8 +23,8 @@ import org.jpos.core.Configuration;
 import org.jpos.core.ConfigurationException;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.math.BigInteger;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * ISOChannel implementation suitable for OASIS Ltd &copy; hosts<br>
@@ -76,7 +76,7 @@ public class ASCIIChannel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public ASCIIChannel (ISOPackager p, ServerSocket serverSocket) 
+    public ASCIIChannel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

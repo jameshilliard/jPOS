@@ -21,7 +21,7 @@ package org.jpos.iso.channel;
 import org.jpos.iso.*;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.nio.channels.AsynchronousServerSocketChannel;
 
 /**
  * Implements an ISOChannel capable to exchange messages with
@@ -72,7 +72,7 @@ public class BASE24Channel extends BaseChannel {
      * @exception IOException
      * @see ISOPackager
      */
-    public BASE24Channel (ISOPackager p, ServerSocket serverSocket) 
+    public BASE24Channel (ISOPackager p, AsynchronousServerSocketChannel serverSocket)
         throws IOException
     {
         super(p, serverSocket);

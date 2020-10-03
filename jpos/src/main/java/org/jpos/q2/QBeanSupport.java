@@ -24,6 +24,7 @@ import org.jpos.core.Configuration;
 import org.jpos.core.ConfigurationException;
 import org.jpos.util.*;
 
+import javax.management.*;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -34,12 +35,13 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author <a href="mailto:taherkordy@dpi2.dpi.net.ir">Alireza Taherkordi</a>
  * @author <a href="mailto:apr@cs.com.uy">Alejandro P. Revilla</a>
  */
-public class QBeanSupport
+public class QBeanSupport extends NotificationBroadcasterSupport
     implements QBean, QPersist, QBeanSupportMBean, Configurable
 {
     Element persist;
@@ -51,6 +53,7 @@ public class QBeanSupport
     protected Log log;
     protected Configuration cfg;
     protected ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+    private AtomicLong notifySequence = new AtomicLong(0);
 
     public QBeanSupport () {
         super();
@@ -126,6 +129,7 @@ public class QBeanSupport
 
     @Override
     public synchronized void start() {
+        sendNotify(this.name);
         if (state != QBean.DESTROYED &&
             state != QBean.STOPPED   &&
             state != QBean.FAILED)
@@ -353,5 +357,9 @@ public class QBeanSupport
         }
         if (evt != null)
             Logger.log(evt);
+    }
+    private void sendNotify(String message) {
+        Notification notification = new Notification("state", this, notifySequence.incrementAndGet(), message);
+        sendNotification(notification);
     }
 }

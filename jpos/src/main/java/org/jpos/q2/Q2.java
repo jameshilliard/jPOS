@@ -106,6 +106,7 @@ public class Q2 implements FileFilter, Runnable {
     private Map<File,QEntry> dirMap;
     private QFactory factory;
     private QClassLoader loader;
+    private QServerManager manager;
     private ClassLoader mainClassLoader;
     private Log log;
     private volatile boolean started;
@@ -149,6 +150,7 @@ public class Q2 implements FileFilter, Runnable {
         dirMap     = new TreeMap<>();
         deployDir.mkdirs ();
         mainClassLoader = getClass().getClassLoader();
+        manager = new QServerManager(this);
         this.bundleContext = bundleContext;
         try {
             Slf4JDynamicBinder.applyMods();
@@ -337,6 +339,7 @@ public class Q2 implements FileFilter, Runnable {
     public QFactory getFactory () {
         return factory;
     }
+    public QServerManager getManager () { return manager; }
     public String[] getCommandLineArgs() {
         return args;
     }
@@ -360,7 +363,7 @@ public class Q2 implements FileFilter, Runnable {
         return (Q2) NameRegistrar.get(JMX_NAME, timeout);
     }
 
-    private boolean isXml(File f) {
+    private static boolean isXml(File f) {
         return f != null && f.getName().toLowerCase().endsWith(".xml");
     }
     private boolean isBundle(File f) {
@@ -586,10 +589,19 @@ public class Q2 implements FileFilter, Runnable {
                     evt.addMessage("deploy: " + f.getCanonicalPath());
                 Object obj = factory.instantiate (this, rootElement);
                 qentry.setObject (obj);
+                qentry.setPath(f.toPath());
+                String xmlDeployName = null;
 
                 ObjectInstance instance = factory.createQBean (
                     this, doc.getRootElement(), obj
                 );
+                try {
+                    server.addNotificationListener(instance.getObjectName(), getManager(), null, qentry);
+                } catch (InstanceNotFoundException ex) {
+                    evt.addMessage(ex);
+                } catch (Exception ex) {
+                    evt.addMessage(ex);
+                }
                 qentry.setInstance (instance);
             } else if (evt != null) {
                 evt.addMessage("deploy ignored (enabled='" + QFactory.getEnabledAttribute(rootElement) + "'): " + f.getCanonicalPath());
@@ -1048,6 +1060,7 @@ public class Q2 implements FileFilter, Runnable {
         ObjectInstance instance;
         Object obj;
         boolean osgiBundle;
+        Path path;
         public QEntry (boolean osgiBundle) {
             super();
             this.osgiBundle = osgiBundle;
@@ -1078,6 +1091,12 @@ public class Q2 implements FileFilter, Runnable {
         public Object getObject () {
             return obj;
         }
+        public void setPath (Path path) {
+            this.path = path;
+        }
+        public Path getPath () {
+            return path;
+        }
         public boolean isQBean () {
             return obj instanceof QBean;
         }
@@ -1086,6 +1105,15 @@ public class Q2 implements FileFilter, Runnable {
         }
         public boolean isQPersist () {
             return obj instanceof QPersist;
+        }
+        public String getXmlDeployName () {
+            File f = path.toFile();
+            if (isXml(f)) {
+                String xmlDeployName = f.getName();
+                xmlDeployName = xmlDeployName.substring(0, xmlDeployName.length() - 4);
+                return xmlDeployName;
+            }
+            return null;
         }
     }
 

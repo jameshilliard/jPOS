@@ -26,13 +26,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.jpos.iso.ISOMsg;
 import org.jpos.transaction.Context;
+import org.jpos.util.NanoClock;
 import org.jpos.util.Profiler;
 import org.jpos.iso.ISOUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class JESpaceTestCase {
     @BeforeEach
     public void setUp (TestInfo testInfo, @TempDir Path spaceTestDir) throws IOException {
         sp = (JESpace<String,Object>)
-            JESpace.getSpace (testInfo.getDisplayName(), spaceTestDir.toString());
+            JESpace.getSpace (testInfo.getDisplayName(), spaceTestDir.toString(), false);
         sp.run();
     }
     @AfterEach
@@ -140,7 +140,6 @@ public class JESpaceTestCase {
         assertNull (sp.rdp ("PUSH"));
     }
     @Test
-    @DisabledIfEnvironmentVariable(named = "GITHUB_ACTIONS", matches = "true")
     public void testOutExpire() {
         sp.out ("OUT", "ONE", 1000L);
         sp.out ("OUT", "TWO", 2000L);
@@ -156,7 +155,6 @@ public class JESpaceTestCase {
         assertNull (sp.rdp ("OUT"));
     }
     @Test
-    @DisabledIfEnvironmentVariable(named = "GITHUB_ACTIONS", matches = "true")
     public void testPushExpire() {
         sp.push ("PUSH", "FOUR", 4000L);
         sp.push ("PUSH", "THREE", 3000L);
@@ -204,11 +202,11 @@ public class JESpaceTestCase {
                 sp.out ("KA", Boolean.TRUE);
             }
         }.start();
-        Instant now = Instant.now();
+        Instant now = Instant.now(NanoClock.systemUTC());
         assertTrue(
             sp.existAny(new String[]{"KA", "KB"}, 2000L),
             "existAnyWithTimeout ([KA,KB], delay)");
-        long elapsed = Duration.between(now, Instant.now()).toMillis();
+        long elapsed = Duration.between(now, Instant.now(NanoClock.systemUTC())).toMillis();
         assertTrue(elapsed > 900L, "delay was > 1000");
         assertNotNull(sp.inp("KA"), "Entry should not be null");
     }

@@ -37,12 +37,7 @@ import org.jpos.iso.ISOUtil;
 import org.jpos.q2.install.ModuleUtils;
 import org.jpos.q2.ssh.SshService;
 import org.jpos.security.SystemSeed;
-import org.jpos.util.Log;
-import org.jpos.util.LogEvent;
-import org.jpos.util.Logger;
-import org.jpos.util.NameRegistrar;
-import org.jpos.util.PGPHelper;
-import org.jpos.util.SimpleLogListener;
+import org.jpos.util.*;
 import org.jpos.util.slf4j.Slf4JDynamicBinder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -142,7 +137,7 @@ public class Q2 implements FileFilter, Runnable {
     public Q2 (String[] args, BundleContext bundleContext) {
         super();
         this.args = args;
-        startTime = Instant.now();
+        startTime = Instant.now(NanoClock.systemUTC());
         instanceId = UUID.randomUUID();
         parseCmdLine (args);
         libDir     = new File (deployDir, "lib");
@@ -673,7 +668,7 @@ public class Q2 implements FileFilter, Runnable {
         return server;
     }
     public long getUptime() {
-        return Duration.between(startTime, Instant.now()).toMillis();
+        return Duration.between(startTime, Instant.now(NanoClock.systemUTC())).toMillis();
     }
     public void displayVersion () {
         System.out.println(getVersionString());
@@ -985,7 +980,7 @@ public class Q2 implements FileFilter, Runnable {
         }
     }
     private void logVersion () {
-        long now = System.currentTimeMillis();
+        long now = Instant.now(NanoClock.systemUTC()).toEpochMilli();
         if (now - lastVersionLog > 86400000L) {
             LogEvent evt = getLog().createLogEvent("version");
             evt.addMessage(getVersionString());

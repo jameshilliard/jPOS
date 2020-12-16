@@ -1114,7 +1114,7 @@ public class TransactionManager
     private void setThreadName (long id, String method, TransactionParticipant p) {
         Thread.currentThread().setName(
             String.format("%s:%d %s %s %s", getName(), id, method, p.getClass().getName(),
-                LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault()))
+                LocalDateTime.ofInstant(Instant.now(NanoClock.systemUTC()), ZoneId.systemDefault()))
         );
     }
     private void setThreadLocal (long id, Serializable context) {

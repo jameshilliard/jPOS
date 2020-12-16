@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jpos.iso.ISOUtil;
+import org.jpos.util.NanoClock;
 import org.jpos.util.Profiler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -289,28 +290,28 @@ public class TSpaceTestCase implements SpaceListener {
                 sp.out("KA", Boolean.TRUE);
             }
         }.start();
-        Instant now = Instant.now();
+        Instant now = Instant.now(NanoClock.systemUTC());
         assertTrue(sp.existAny(new String[] { "KA", "KB" }, 2000L), "existAnyWithTimeout ([KA,KB], delay)");
-        long elapsed = Duration.between(now, Instant.now()).toMillis();
+        long elapsed = Duration.between(now, Instant.now(NanoClock.systemUTC())).toMillis();
         assertTrue(elapsed > 900L, "delay was > 1000");
     }
 
     @Test
     public void testNRD() {
-        Instant now = Instant.now();
+        Instant now = Instant.now(NanoClock.systemUTC());
         sp.out("NRD", "NRDTEST", 1000L);
         sp.nrd("NRD");
-        long elapsed = Duration.between(now, Instant.now()).toMillis();
+        long elapsed = Duration.between(now, Instant.now(NanoClock.systemUTC())).toMillis();
         assertTrue(elapsed >= 1000L, "Invalid elapsed time " + elapsed);
     }
     @Test
     public void testNRDWithDelay() {
-        Instant now = Instant.now();
+        Instant now = Instant.now(NanoClock.systemUTC());
         sp.out("NRD", "NRDTEST", 1000L);
         Object obj = sp.nrd("NRD", 500L);
         assertNotNull(obj, "Object should not be null");
         obj = sp.nrd("NRD", 5000L);
-        long elapsed = Duration.between(now, Instant.now()).toMillis();
+        long elapsed = Duration.between(now, Instant.now(NanoClock.systemUTC())).toMillis();
         assertTrue(elapsed >= 1000L && elapsed <= 2000L, "Invalid elapsed time " + elapsed);
         assertNull(obj, "Object should be null");
     }

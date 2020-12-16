@@ -56,7 +56,7 @@ public class ThroughputControl {
             this.max[i]    = maxTransactions[i];
             this.period[i] = periodInMillis[i];
             this.sleep[i]  = Math.min(Math.max (periodInMillis[i]/10, 500L),50L);
-            this.start[i]  = Instant.now().toEpochMilli();
+            this.start[i]  = Instant.now(NanoClock.systemUTC()).toEpochMilli();
         }
     }
 
@@ -68,7 +68,7 @@ public class ThroughputControl {
      */
     public long control() {
         boolean delayed = false;
-        long init = Instant.now().toEpochMilli();
+        long init = Instant.now(NanoClock.systemUTC()).toEpochMilli();
         for (int i=0; i<cnt.length; i++) {
             synchronized (this) {
                 cnt[i]++;
@@ -81,7 +81,7 @@ public class ThroughputControl {
                     } catch (InterruptedException e) { }
                 }
                 synchronized (this) {
-                    long now = Instant.now().toEpochMilli();
+                    long now = Instant.now(NanoClock.systemUTC()).toEpochMilli();
                     if (now - start[i] > period[i]) {
                         long elapsed = now - start[i];
                         int  allowed = (int) (elapsed * max[i] / period[i]);
@@ -91,7 +91,7 @@ public class ThroughputControl {
                 }
             } while (cnt[i] > max[i]);
         }
-        return delayed ? Instant.now().toEpochMilli() - init : 0L;
+        return delayed ? Instant.now(NanoClock.systemUTC()).toEpochMilli() - init : 0L;
     }
 }
 

@@ -19,6 +19,8 @@
 package org.jpos.transaction.participant;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 
 import org.jpos.core.Configurable;
 import org.jpos.core.Configuration;
@@ -32,6 +34,7 @@ import org.jpos.util.Caller;
 import org.jpos.util.Chronometer;
 import org.jpos.util.NameRegistrar;
 import org.jpos.transaction.Context;
+import org.jpos.util.NanoClock;
 
 @SuppressWarnings("unused")
 public class QueryHost implements TransactionParticipant, ISOResponseListener, Configurable {
@@ -128,8 +131,8 @@ public class QueryHost implements TransactionParticipant, ISOResponseListener, C
     protected boolean isConnected (MUX mux) {
         if (!checkConnected || mux.isConnected())
             return true;
-        long timeout = System.currentTimeMillis() + waitTimeout;
-        while (System.currentTimeMillis() < timeout) {
+        Instant now = Instant.now(NanoClock.systemUTC());
+        while (Duration.between(now, Instant.now(NanoClock.systemUTC())).toMillis() < waitTimeout) {
             if (mux.isConnected())
                 return true;
             ISOUtil.sleep (500);

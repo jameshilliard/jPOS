@@ -18,6 +18,8 @@
 
 package org.jpos.space;
 import org.jpos.util.Loggeable;
+import org.jpos.util.NanoClock;
+
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.time.Duration;
@@ -41,7 +43,7 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
     private static final long NRD_RESOLUTION = 500L;
     private static final int MAX_ENTRIES_IN_DUMP = 1000;
     private final Set[] expirables;
-    private long lastLongGC = Instant.now().toEpochMilli();
+    private long lastLongGC = Instant.now(NanoClock.systemUTC()).toEpochMilli();
 
     public TSpace () {
         super();
@@ -70,7 +72,7 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
             throw new NullPointerException ("key=" + key + ", value=" + value);
         Object v = value;
         if (timeout > 0) {
-            v = new Expirable (value, Instant.now().toEpochMilli() + timeout);
+            v = new Expirable (value, Instant.now(NanoClock.systemUTC()).toEpochMilli() + timeout);
         }
         synchronized (this) {
             List l = getList(key);
@@ -113,13 +115,13 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
     @Override
     public synchronized V in  (Object key, long timeout) {
         Object obj;
-        Instant now = Instant.now();
-        long duration;
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
         while ((obj = inp (key)) == null &&
-                (duration = Duration.between(now, Instant.now()).toMillis()) < timeout)
+                Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0)
         {
             try {
-                this.wait (timeout - duration);
+                this.wait (Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L));
             } catch (InterruptedException e) { }
         }
         return (V) obj;
@@ -139,13 +141,13 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
     @Override
     public synchronized V rd  (Object key, long timeout) {
         Object obj;
-        Instant now = Instant.now();
-        long duration;
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
         while ((obj = rdp (key)) == null &&
-                (duration = Duration.between(now, Instant.now()).toMillis()) < timeout)
+                Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0)
         {
             try {
-                this.wait (timeout - duration);
+                this.wait (Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L));
             } catch (InterruptedException e) { }
         }
         return (V) obj;
@@ -163,13 +165,13 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
     @Override
     public synchronized V nrd  (Object key, long timeout) {
         Object obj;
-        Instant now = Instant.now();
-        long duration;
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
         while ((obj = rdp (key)) != null &&
-                (duration = Duration.between(now, Instant.now()).toMillis()) < timeout)
+                Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0)
         {
             try {
-                this.wait (Math.min(NRD_RESOLUTION, timeout - duration));
+                this.wait (Math.min(NRD_RESOLUTION, Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L)));
             } catch (InterruptedException ignored) { }
         }
         return (V) obj;
@@ -186,9 +188,9 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
 
     public void gc () {
         gc(0);
-        if (Instant.now().toEpochMilli() - lastLongGC > GCLONG) {
+        if (Instant.now(NanoClock.systemUTC()).toEpochMilli() - lastLongGC > GCLONG) {
             gc(1);
-            lastLongGC = Instant.now().toEpochMilli();
+            lastLongGC = Instant.now(NanoClock.systemUTC()).toEpochMilli();
         }
     }
 
@@ -336,7 +338,7 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
             throw new NullPointerException ("key=" + key + ", value=" + value);
         Object v = value;
         if (timeout > 0) {
-            v = new Expirable (value, Instant.now().toEpochMilli() + timeout);
+            v = new Expirable (value, Instant.now(NanoClock.systemUTC()).toEpochMilli() + timeout);
         }
         synchronized (this) {
             List l = getList(key);
@@ -373,7 +375,7 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
             throw new NullPointerException ("key=" + key + ", value=" + value);
         Object v = value;
         if (timeout > 0) {
-            v = new Expirable (value, Instant.now().toEpochMilli() + timeout);
+            v = new Expirable (value, Instant.now(NanoClock.systemUTC()).toEpochMilli() + timeout);
         }
         synchronized (this) {
             List l = new LinkedList();
@@ -399,14 +401,14 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
 
     @Override
     public boolean existAny (K[] keys, long timeout) {
-        Instant now = Instant.now();
-        long duration;
-        while ((duration = Duration.between(now, Instant.now()).toMillis()) < timeout) {
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
+        while (Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0) {
             if (existAny (keys))
                 return true;
             synchronized (this) {
                 try {
-                    wait (timeout - duration);
+                    wait (Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L));
                 } catch (InterruptedException e) { }
             }
         }
@@ -529,7 +531,7 @@ public class TSpace<K,V> implements LocalSpace<K,V>, Loggeable, Runnable {
         }
 
         public boolean isExpired () {
-            return expires < Instant.now().toEpochMilli();
+            return expires < Instant.now(NanoClock.systemUTC()).toEpochMilli();
         }
 
         @Override

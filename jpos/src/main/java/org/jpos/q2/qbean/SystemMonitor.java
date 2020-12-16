@@ -125,9 +125,9 @@ public class SystemMonitor extends QBeanSupport
             log.info(this);
             frozenDump = null;
             try {
-                long expected = System.currentTimeMillis() + sleepTime;
+                long expected = Instant.now(NanoClock.systemUTC()).toEpochMilli() + sleepTime;
                 Thread.sleep(sleepTime);
-                delay = System.currentTimeMillis() - expected;
+                delay = Instant.now(NanoClock.systemUTC()).toEpochMilli() - expected;
             } catch (InterruptedException ignored) {
             }
         }
@@ -185,7 +185,7 @@ public class SystemMonitor extends QBeanSupport
         String newIndent = indent + "  ";
         Runtime r = getRuntimeInstance();
         ZoneId zi = ZoneId.systemDefault();
-        Instant instant = Instant.now();
+        Instant instant = Instant.now(NanoClock.systemUTC());
 
         File cwd = new File(".");
         String freeSpace = ISOUtil.readableFileSize(cwd.getFreeSpace());
@@ -230,7 +230,7 @@ public class SystemMonitor extends QBeanSupport
             Instant in = tran.getInstant();
             p.printf("%s   transition: %s (%s)%n", indent, in, in.atZone(zi));
         }
-        p.printf("%s        clock: %d %s%n", indent, System.currentTimeMillis() / 1000L, instant);
+        p.printf("%s        clock: %d %s%n", indent, Instant.now(NanoClock.systemUTC()).toEpochMilli() / 1000L, instant);
         if (hasSecurityManager())
             p.printf("%s  sec-manager: %s%n", indent, getSecurityManager());
         p.printf("%s thread count: %d%n", indent, mxBean.getThreadCount());

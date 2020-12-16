@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.jpos.iso.ISOUtil;
 
+import org.jpos.util.NanoClock;
 import org.jpos.util.TPS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -184,9 +185,9 @@ public class TSpacePerformanceTest  {
         for (int i=0; i<size; i++)
           es.execute(new WriteSpaceWithNotifyTask("WriteTask2-"+i,sp2,sp1));
 
-        Instant stamp = Instant.now();
+        Instant stamp = Instant.now(NanoClock.systemUTC());
         while (((ThreadPoolExecutor)es).getActiveCount() > 0) {
-          if (Duration.between(stamp, Instant.now()).toMillis() < 10000){
+          if (Duration.between(stamp, Instant.now(NanoClock.systemUTC())).toMillis() < 10000){
             ISOUtil.sleep(100);
             continue;
           }

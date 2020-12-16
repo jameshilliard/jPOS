@@ -30,16 +30,16 @@ public class TPSTestCase {
     @Test
     public void test1000TPSAutoUpdate() throws Exception {
         TPS tps = new TPS(true);
-        Instant nowInit = Instant.now();
+        Instant nowInit = Instant.now(NanoClock.systemUTC());
         for (int i=0; i<1000; i++)
             tps.tick();
-        Instant nowDone = Instant.now();
-        Thread.sleep (1100L - Duration.between(nowInit, Instant.now()).toMillis()); // java.util.Timer is not accurate
+        Instant nowDone = Instant.now(NanoClock.systemUTC());
+        Thread.sleep (1100L - Duration.between(nowInit, Instant.now(NanoClock.systemUTC())).toMillis()); // java.util.Timer is not accurate
         assertEquals(1000, tps.intValue(), "Expected 1000 TPS");
         assertEquals(1000, tps.intValue(), "Still expecting 1000 TPS on a second call");
-        Thread.sleep (2100L - Duration.between(nowDone, Instant.now()).toMillis());
+        Thread.sleep (2100L - Duration.between(nowDone, Instant.now(NanoClock.systemUTC())).toMillis());
         assertTrue(tps.getAvg() >= 0.5, "Average should be aprox 0.5 but it's " + tps.getAvg());
-        Thread.sleep (3100L - Duration.between(nowDone, Instant.now()).toMillis());
+        Thread.sleep (3100L - Duration.between(nowDone, Instant.now(NanoClock.systemUTC())).toMillis());
         assertEquals(
             0, tps.intValue(),
             "TPS should be zero but it's " + tps.intValue() + " (" + tps.floatValue() + ")"
@@ -50,14 +50,14 @@ public class TPSTestCase {
     @Test
     public void test1000TPSManualUpdate() throws Exception {
         TPS tps = new TPS();
-        Instant nowInit = Instant.now();
+        Instant nowInit = Instant.now(NanoClock.systemUTC());
         for (int i=0; i<1000; i++)
             tps.tick();
-        Instant nowDone = Instant.now();
-        Thread.sleep (1050L - Duration.between(nowInit, Instant.now()).toMillis());
+        Instant nowDone = Instant.now(NanoClock.systemUTC());
+        Thread.sleep (1050L - Duration.between(nowInit, Instant.now(NanoClock.systemUTC())).toMillis());
         assertTrue(tps.intValue() >= 800, "Expected aprox 1000 TPS but was " + tps.intValue());
         assertTrue(tps.intValue() >= 800, "Still expecting aprox 1000 TPS on a second call");
-        Thread.sleep (2500L - Duration.between(nowDone, Instant.now()).toMillis());
+        Thread.sleep (2500L - Duration.between(nowDone, Instant.now(NanoClock.systemUTC())).toMillis());
         assertEquals(
             0, tps.intValue(),
             "TPS should be zero but it's " + tps.intValue() + " (" + tps.floatValue() + ")"

@@ -28,6 +28,7 @@ import static org.apache.commons.lang3.JavaVersion.JAVA_10;
 import static org.apache.commons.lang3.JavaVersion.JAVA_14;
 import static org.apache.commons.lang3.SystemUtils.isJavaVersionAtMost;
 
+import org.jpos.util.NanoClock;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -330,7 +331,7 @@ public class JDBMSpaceTest {
 
     @Test
     public void testRefIsExpired() throws Throwable {
-        long expirytime = Instant.now().toEpochMilli() + 365 * 24 * 60 * 60 * 1000;
+        long expirytime = Instant.now(NanoClock.systemUTC()).toEpochMilli() + 365 * 24 * 60 * 60 * 1000;
         boolean result = new JDBMSpace.Ref(100L, expirytime).isExpired();
         assertFalse(result, "result");
     }

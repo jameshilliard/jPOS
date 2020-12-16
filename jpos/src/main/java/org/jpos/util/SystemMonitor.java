@@ -19,6 +19,7 @@
 package org.jpos.util;
 
 import java.io.PrintStream;
+import java.time.Instant;
 
 /**
  * Periodically dumps Thread and memory usage
@@ -88,9 +89,9 @@ public class SystemMonitor implements Runnable, LogSource, Loggeable
         while (!shutdown) {
             Logger.log (new LogEvent (this, "SystemMonitor", this));
             try {
-                long expected = System.currentTimeMillis() + sleepTime;
+                long expected = Instant.now(NanoClock.systemUTC()).toEpochMilli() + sleepTime;
                 Thread.sleep (sleepTime);
-                delay = (int) (System.currentTimeMillis() - expected);
+                delay = (int) (Instant.now(NanoClock.systemUTC()).toEpochMilli() - expected);
             } catch (InterruptedException e) { }
         }
     }

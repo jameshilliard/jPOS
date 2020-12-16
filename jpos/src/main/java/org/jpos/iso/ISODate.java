@@ -18,8 +18,11 @@
 
 package org.jpos.iso;
 
+import org.jpos.util.NanoClock;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -131,7 +134,7 @@ public class ISODate {
      * @return Date
      */
     public static Date parseISODate (String d) {
-        return parseISODate (d, System.currentTimeMillis());
+        return parseISODate (d, Instant.now(NanoClock.systemUTC()).toEpochMilli());
     }
 
     /**
@@ -143,7 +146,7 @@ public class ISODate {
      * @return Date
      */
     public static Date parseISODate (String d, TimeZone timeZone) {
-        return parseISODate (d, System.currentTimeMillis(), timeZone);
+        return parseISODate (d, Instant.now(NanoClock.systemUTC()).toEpochMilli(), timeZone);
     }
 
     /**

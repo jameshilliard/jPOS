@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import org.jpos.iso.ISOUtil;
 import org.jpos.util.Log;
 import org.jpos.util.Loggeable;
-import org.jpos.util.Profiler;
+import org.jpos.util.NanoClock;
 
 /**
  * BerkeleyDB Jave Edition based persistent space implementation
@@ -71,7 +71,11 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
     static final Map<String,Space> spaceRegistrar = 
         new HashMap<String,Space> ();
 
-    public JESpace(String name, String params) throws SpaceError {
+    public JESpace(String name, String params) {
+        this(name, params, true);
+    }
+
+    public JESpace(String name, String params, boolean sync) throws SpaceError {
         super();
         try {
             EnvironmentConfig envConfig = new EnvironmentConfig();
@@ -79,6 +83,8 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
             String[] p = ISOUtil.commaDecode(params);
             String path = p[0];
             envConfig.setAllowCreate (true);
+            if (!sync)
+                envConfig.setDurability(Durability.COMMIT_NO_SYNC);
             envConfig.setTransactional(true);
             envConfig.setLockTimeout(getParam("lock.timeout", p, DEFAULT_LOCK_TIMEOUT), TimeUnit.MILLISECONDS);
             envConfig.setTxnTimeout(getParam("txn.timeout", p, DEFAULT_TXN_TIMEOUT), TimeUnit.MILLISECONDS);
@@ -175,13 +181,13 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
     @SuppressWarnings("unchecked")
     public synchronized V in (Object key, long timeout) {
         Object obj;
-        Instant now = Instant.now();
-        long duration;
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
         while ((obj = inp (key)) == null &&
-                (duration = Duration.between(now, Instant.now()).toMillis()) < timeout)
+                Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0)
         {
             try {
-                this.wait (timeout - duration);
+                this.wait (Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L));
             } catch (InterruptedException ignored) { }
         }
         return (V) obj;
@@ -200,13 +206,13 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
     @SuppressWarnings("unchecked")
     public synchronized V rd  (Object key, long timeout) {
         Object obj;
-        Instant now = Instant.now();
-        long duration;
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
         while ((obj = rdp (key)) == null &&
-                (duration = Duration.between(now, Instant.now()).toMillis()) < timeout)
+                Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0)
         {
             try {
-                this.wait (timeout - duration);
+                this.wait (Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L));
             } catch (InterruptedException ignored) { }
         }
         return (V) obj;
@@ -220,13 +226,13 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
     }
     public synchronized V nrd  (Object key, long timeout) {
         Object obj;
-        Instant now = Instant.now();
-        long duration;
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
         while ((obj = rdp (key)) != null &&
-                (duration = Duration.between(now, Instant.now()).toMillis()) < timeout)
+                Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0)
         {
             try {
-                this.wait (Math.min(NRD_RESOLUTION, timeout - duration));
+                this.wait (Math.min(NRD_RESOLUTION, Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L)));
             } catch (InterruptedException ignored) { }
         }
         return (V) obj;
@@ -249,14 +255,14 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
         return false;
     }
     public boolean existAny (Object[] keys, long timeout) {
-        Instant now = Instant.now();
-        long duration;
-        while ((duration = Duration.between(now, Instant.now()).toMillis()) < timeout) {
+        Instant now = Instant.now(NanoClock.systemUTC());
+        Duration duration;
+        while (Duration.ofMillis(timeout).compareTo(duration = Duration.between(now, Instant.now(NanoClock.systemUTC()))) > 0) {
             if (existAny (keys))
                 return true;
             synchronized (this) {
                 try {
-                    wait (timeout - duration);
+                    wait (Math.max(Duration.ofMillis(timeout).minus(duration).toMillis(), 1L));
                 } catch (InterruptedException ignored) { }
             }
         }
@@ -280,7 +286,7 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
                 return;
             txn = dbe.beginTransaction (null, null);
             cursor = gcsIndex.entities (
-                txn, 0L, true, Instant.now().toEpochMilli(), false, null
+                txn, 0L, true, Instant.now(NanoClock.systemUTC()).toEpochMilli(), false, null
             );
             for (GCRef gcRef: cursor) {
                 pIndex.delete (gcRef.getId());
@@ -323,11 +329,15 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
         dbe.close();
     }
 
-    public synchronized static JESpace getSpace (String name, String path)
+    public static JESpace getSpace (String name, String path) {
+        return getSpace(name, path, true);
+    }
+
+    public synchronized static JESpace getSpace (String name, String path, boolean sync)
     {
         JESpace sp = (JESpace) spaceRegistrar.get (name);
         if (sp == null) {
-            sp = new JESpace(name, path);
+            sp = new JESpace(name, path, sync);
             spaceRegistrar.put (name, sp);
         }
         return sp;
@@ -487,7 +497,7 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
             this.key = key;
             this.value =  serialize (value);
             if (timeout > 0L)
-                this.expires = Instant.now().toEpochMilli() + timeout;
+                this.expires = Instant.now(NanoClock.systemUTC()).toEpochMilli() + timeout;
         }
         public long getId() {
             return id;
@@ -496,7 +506,7 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
             this.id = -this.id;
         }
         public boolean isExpired () {
-            return expires > 0L && expires < Instant.now().toEpochMilli();
+            return expires > 0L && expires < Instant.now(NanoClock.systemUTC()).toEpochMilli();
         }
         public boolean isActive () {
             return !isExpired();
@@ -625,7 +635,7 @@ public class JESpace<K,V> extends Log implements LocalSpace<K,V>, Loggeable, Run
             return id;
         }
         public boolean isExpired () {
-            return expires > 0L && expires < Instant.now().toEpochMilli();
+            return expires > 0L && expires < Instant.now(NanoClock.systemUTC()).toEpochMilli();
         }
         public long getExpiration () {
             return expires;

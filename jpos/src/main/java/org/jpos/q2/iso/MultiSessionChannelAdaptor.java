@@ -25,8 +25,10 @@ import org.jpos.space.SpaceUtil;
 import org.jpos.util.LogSource;
 import org.jpos.util.Loggeable;
 import org.jpos.util.NameRegistrar;
+import org.jpos.util.NanoClock;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -136,7 +138,7 @@ public class MultiSessionChannelAdaptor
                     }
                     ISOMsg m = channel.receive ();
                     rx++;
-                    lastTxn = System.currentTimeMillis();
+                    lastTxn = Instant.now(NanoClock.systemUTC());
                     if (timeout > 0)
                         sp.out (out, m, timeout);
                     else
